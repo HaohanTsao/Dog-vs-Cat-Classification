@@ -55,7 +55,7 @@ testing_df = pd.DataFrame(testing_data)
 
 df = pd.concat([training_df, testing_df], ignore_index=True)
 # split val and train 1:9
-train_df, val_df = train_test_split(training_df, test_size=0.1, random_state=2023)
+train_df, val_df = train_test_split(training_df, test_size=0.2, random_state=2023)
 train_df = train_df.iloc[:, :2]
 val_df = val_df.iloc[:, :2]
 test_df = testing_df.iloc[:, :2]
@@ -78,7 +78,7 @@ class DogCatLoader(Dataset):
 
     def __getitem__(self, item):
         image = Image.open(self.dataset[item][0])
-        classCategory = 0 if self.dataset[item][1] == 'dog' else 1 # dog 0, cat 1
+        classCategory = self.dataset[item][1]
         if self.transform:
             image = self.transform(image)
         return image, classCategory
@@ -116,12 +116,63 @@ valid_transform = transforms.Compose([
 
 # %%
 # 將訓練資料再切分為 Train、Validation
+training_set = ImageFolder(train_folder)
+
 train_data, valid_data, train_label, valid_label = train_test_split(
-    train_dataset.imgs, train_dataset.targets, test_size=0.2, random_state=2023
+    training_set.imgs, training_set.targets, test_size=0.1, random_state=42
 )
 
-valid_dataset = DogCatLoader(valid_data, valid_transform)
 train_dataset = DogCatLoader(train_data, train_transform)
+valid_dataset = DogCatLoader(valid_data, valid_transform)
 
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=64, shuffle=True)
+
+# %%
+image_size = 224
+image_channel = 3 # RGO
+bat_size = 64 # 64
+# %%
+# building Network
+
+class ImageClassifier(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # input_size: 3*224*224
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(image_channel, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(32),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(0.2),
+            ) # 32*112*112
+        
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(64),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(0.2),
+            ) # 64*56*56
+        
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(128),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(0.2), 
+            ) # 128*28*28
+        
+        self.conv4 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.MaxPool2d(kernel_size=2),
+            nn.Dropout(0.2)
+            ) # 128*28*28
+
+        
+
+# %%
+
+# %%
