@@ -190,7 +190,7 @@ class ImageClassifier(nn.Module):
         output = self.conv2(output)
         output = self.conv3(output)
         output = self.conv4(output)
-        output.view(-1, 256*(image_size//16)*(image_size//16)) # flatten
+        output = output.view(-1, 256*(image_size//16)*(image_size//16)) # flatten
         output = self.fc1(output)
         output = self.fc2(output)
 
