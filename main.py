@@ -220,8 +220,7 @@ def training_loop(n_epochs, optimizer, scheduler, model, loss_fn, train_loader, 
                 current_lr = optimizer.param_groups[0]['lr']
                 scheduler.step(val_loss)
 
-        if epoch == 0 or (epoch + 1) % 5 == 0:
-            print(f'Epoch {epoch}, loss: {loss_train/(len(train_loader))}, acc: {train_accuracy}, val_loss: {val_loss/(len(val_loader))}, val_acc: {val_accuracy}, lr:{current_lr}')
+        print(f'Epoch {epoch}, loss: {loss_train/(len(train_loader))}, acc: {train_accuracy}, val_loss: {val_loss/(len(val_loader))}, val_acc: {val_accuracy}, lr:{current_lr}')
         
         if val_accuracy > best_val_accuracy:
             best_val_accuracy = val_accuracy
@@ -281,14 +280,41 @@ training_loop(
 # %%
 # testing
 testing_set = ImageFolder(test_folder)
+test_dataset = DogCatLoader(testing_set.imgs, valid_transform)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 # %%
-model.eval()
-test_loss = 0
-correct = 0
-test_accuracy, test_loss, _ = validate(model, train_loader, test_loader, loss_fn, testing=True)
+import matplotlib.pyplot as plt
+from matplotlib.image import imread
+def predict_and_display_image(image_path, model):
+    image = Image.open(image_path)
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5]*3, std=[0.5]*3)
+    ])
+    image = transform(image)
+    image = image.unsqueeze(0).to(device = device)
 
-print(f"Average Loss: {test_loss / len(test_loader)}, Accuracy: {test_accuracy}")
+    model.eval()
+    with torch.no_grad():
+        output = model(image)
+        
+    _, predicted = torch.max(output, 1)
+    if predicted.item() == 0:
+        category = 'cat'
+    else:
+        category = 'dog'
+    
+    print(f"Predicted class: {category}")
+
+    image = imread(image_path)
+    plt.imshow(image)
+    plt.title(f"Predicted class: {category}")
+    plt.axis('off')
+    plt.show()
+    
+image_path = testing_set.imgs[0][0]  # change
+predict_and_display_image(image_path, model)
 # %%
 # save model
 torch.save(
