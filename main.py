@@ -1,5 +1,5 @@
 # %%
-DATA_PATH = "C:\\Users\\USER\\Downloads\\dog-and-cat\\dog-and-cat"
+DATA_PATH = "" # add your own path
 # %%
 import os
 from os import makedirs, listdir
@@ -20,6 +20,7 @@ import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 # %%
 # check data
+# modify the below path if needed
 train_folder = f"{DATA_PATH}\\training_set"
 test_folder = f"{DATA_PATH}\\testing_set"
 train_dataset = ImageFolder(train_folder)
