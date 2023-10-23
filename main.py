@@ -264,7 +264,7 @@ def validate(model, train_loader, val_loader, loss_fn, testing = False):
 model = ImageClassifier(2, image_size, image_channel).to(device=device)
 loss_fn = nn.BCELoss()
 optimizer = optim.AdamW(model.parameters(), lr=0.001)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=2, factor=0.5, verbose=True, min_lr=0.00001)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=2, factor=0.5, verbose=True, min_lr=0.00001)
 # %%
 model.train()
 training_loop(
